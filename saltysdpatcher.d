@@ -1,5 +1,5 @@
 /*
- * Quick Auto-Patcher for SaltySD v0.1
+ * Quick Auto-Patcher for SaltySD v0.1.1
  *   written by TheGag96
  *
  * Contact me on Reddit/GBATemp if you have any questions, problems, or suggestions.
