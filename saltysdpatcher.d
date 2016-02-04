@@ -53,8 +53,8 @@ void compilePatches() {
 void grabNewestFiles() {
   mkdir("temp");
 
-  auto files = ["Makefile", "datasize.asm", "exist.asm", "find.asm", "hookdatasize.asm",
-                "hookexist.asm", "hookfind.asm", "hooklock.asm", "lock.asm", "sdsound.asm"];
+  auto files = ["Makefile", "datasize.asm", "exist.asm", "hookdatasize.asm",
+                "hookexist.asm", "hooklock.asm", "lock.asm", "sdsound.asm"];
 
   foreach (file; files) {
     writeln("Downloading ", file, "...");
@@ -76,8 +76,8 @@ bool checkFilesValidity() {
     return false;
   }
 
-  auto requiredFiles = ["datasize.bin", "exist.bin", "find.bin", "hookdatasize.bin", "hookexist.bin",
-                        "hookfind.bin", "hooklock.bin", "lock.bin", "sdsound.bin"];
+  auto requiredFiles = ["datasize.bin", "exist.bin", "hookdatasize.bin", "hookexist.bin",
+                        "hooklock.bin", "lock.bin", "sdsound.bin"];
 
   foreach (file; requiredFiles) {
     if (!exists(patchesDir ~ "/" ~ file)) {
@@ -110,8 +110,6 @@ void patchItUp() {
     "lock"         : 0xA3B800,
     "hookexist"    : 0x159EBC,
     "exist"        : 0xA3E800,
-    //"hookfind"     : 0x16EFAC,
-    //"find"         : 0xA1CF00,
     "sdsound"      : 0xA3D800
   ];
 
@@ -141,14 +139,6 @@ void patchItUp() {
     //also do it 0x100000 bytes back (virtual 3ds address to real code.bin address)
     romData.seek(insertionPoints[patchName] - 0x100000);
     romData.rawWrite(patchData);
-
-    /* Commented out due to unnecessary hook
-    //extra insertion point needed for hookfind
-    if (patchName == "hookfind") {
-      romData.seek(0x9E1F58 - isCodebin * 0x100000);
-      romData.rawWrite(patchData);
-    }
-    */
   }
 
   //write the extra byte patches
