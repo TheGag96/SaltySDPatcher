@@ -1,10 +1,10 @@
 /*
- * Quick Auto-Patcher for SaltySD v0.1.1
+ * Quick Auto-Patcher for SaltySD v0.2 for Sm4sh 3DS v1.1.4
  *   written by TheGag96
  *
  * Contact me on Reddit/GBATemp if you have any questions, problems, or suggestions.
  * 
- * Do whatever you want with this code, just keep my name in it somewhere!
+ * License: Public domain
  */
 
 import std.stdio, std.net.curl, std.file, std.process, std.typecons, std.algorithm, std.path;
@@ -12,26 +12,15 @@ import std.stdio, std.net.curl, std.file, std.process, std.typecons, std.algorit
 bool buildNewest = true;
 string inputFile;
 string patchesDir = "temp";
-bool isCodebin = false;
 
 void main(string[] args) {
   if (args.length < 2 || args.length > 4) {
-    writeln("Usage: saltypatcher <filename> <patches dir> (-codebin)");
+    writeln("Usage: saltypatcher <filename> <patches dir>");
     writeln("If <patces dir> is not specified, the files will be downloaded and compiled automatically.");
     writeln("Note that this requires DevkitPro and make to be installed on your machine!");
     return;
   }
   else if (args.length == 3) {
-    if (args[2] == "-codebin") {
-      isCodebin = true;
-    }
-    else {
-      patchesDir = args[2];
-      buildNewest = false;
-    }
-  }
-  else if (args.length == 4) {
-    if (args[3] == "-codebin") isCodebin = true;
     patchesDir = args[2];
     buildNewest = false;
   }
@@ -115,24 +104,24 @@ void patchItUp() {
   writeln("Patching file ", inputFile, "...");
 
   immutable long[string] insertionPoints = [
-    "hookdatasize" : 0x13F4B8,
-    "datasize"     : 0xA1C800,
-    "hooklock"     : 0x1816CC,
-    "lock"         : 0xA1B800,
-    "hookexist"    : 0x159E9C,
-    "exist"        : 0xA1CD00,
+    "hookdatasize" : 0x16F0D0,
+    "datasize"     : 0xA3C800,
+    "hooklock"     : 0x181708,
+    "lock"         : 0xA3B800,
+    "hookexist"    : 0x159EBC,
+    "exist"        : 0xA3E800,
     //"hookfind"     : 0x16EFAC,
     //"find"         : 0xA1CF00,
-    "sdsound"      : 0xA1CB00
+    "sdsound"      : 0xA3D800
   ];
 
   BytePatch[] extraPatches = [
-    BytePatch(0x13F4B4, [0x1E, 0xFF, 0x2F, 0xE1]),
-    BytePatch(0x140DBC, [0x01, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1]),
-    BytePatch(0x159E98, [0x70, 0x40, 0x2D, 0xE9]),
-    BytePatch(0x159EF0, [0x70, 0x80, 0xBD, 0xE8]),
-    BytePatch(0x7AB5C4, [0x00, 0xCB, 0xA1, 0x00]),
-    BytePatch(0x7AB5E0, [0x9B, 0x37, 0xB6, 0x00])
+    BytePatch(0x13F4B8, [0x1E, 0xFF, 0x2F, 0xE1]),
+    BytePatch(0x140DC0, [0x01, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1]),
+    BytePatch(0x159EB8, [0x70, 0x40, 0x2D, 0xE9]),
+    BytePatch(0x159F10, [0x70, 0x80, 0xBD, 0xE8]),
+    BytePatch(0x7BC0EC, [0x00, 0xD8, 0xA3, 0x00]),
+    BytePatch(0x7BC108, [0xBF, 0x69, 0xB7, 0x00])
   ];
 
   auto romData = File(inputFile, "r+b");
@@ -149,8 +138,8 @@ void patchItUp() {
     
 
     //write the patch
-    //also take into account if it needs to be done 0x100000 bytes back (if it's a codebin)
-    romData.seek(insertionPoints[patchName] - isCodebin * 0x100000);
+    //also do it 0x100000 bytes back (virtual 3ds address to real code.bin address)
+    romData.seek(insertionPoints[patchName] - 0x100000);
     romData.rawWrite(patchData);
 
     /* Commented out due to unnecessary hook
@@ -164,7 +153,7 @@ void patchItUp() {
 
   //write the extra byte patches
   foreach (patch; extraPatches) {
-    romData.seek(patch.address - isCodebin * 0x100000);
+    romData.seek(patch.address - 0x100000);
     romData.rawWrite(patch.bytes);
   }
 }
